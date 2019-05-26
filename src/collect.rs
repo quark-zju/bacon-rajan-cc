@@ -46,7 +46,7 @@ pub fn add_root(box_ptr: NonNull<CcBoxPtr>) {
 /// }
 ///
 /// impl Trace for Gadget {
-///     fn trace(&mut self, _tracer: &mut Tracer) { /* ... */ }
+///     fn trace(&self, _tracer: &mut Tracer) { /* ... */ }
 /// }
 ///
 /// fn add_child(parent: &mut Cc<RefCell<Gadget>>) -> Cc<RefCell<Gadget>> {
@@ -130,7 +130,7 @@ pub fn number_of_roots_buffered() -> usize {
 /// }
 ///
 /// impl Trace for Gadget {
-///     fn trace(&mut self, tracer: &mut Tracer) {
+///     fn trace(&self, tracer: &mut Tracer) {
 ///         self.parent.trace(tracer);
 ///         self.children.trace(tracer);
 ///     }
@@ -191,7 +191,7 @@ pub fn collect_cycles() {
 /// garbage cycle, and we will have to restore its old reference count in
 /// `scan_roots`.
 fn mark_roots() {
-    fn mark_gray(cc_box_ptr: &mut CcBoxPtr) {
+    fn mark_gray(cc_box_ptr: &CcBoxPtr) {
         if cc_box_ptr.color() == Color::Gray {
             return;
         }
@@ -244,7 +244,7 @@ fn mark_roots() {
 /// White nodes if its reference count is 0 and it is part of a garbage cycle,
 /// or Black if the node is still live.
 fn scan_roots() {
-    fn scan_black(s: &mut CcBoxPtr) {
+    fn scan_black(s: &CcBoxPtr) {
         s.data().color.set(Color::Black);
         s.trace(&mut |t| {
             t.inc_strong();
@@ -254,7 +254,7 @@ fn scan_roots() {
         });
     }
 
-    fn scan(s: &mut CcBoxPtr) {
+    fn scan(s: &CcBoxPtr) {
         if s.color() != Color::Gray {
             return;
         }
@@ -285,7 +285,7 @@ fn scan_roots() {
 fn collect_roots() {
     use std::rc::Rc;
 
-    fn collect_white(s: &mut CcBoxPtr, w: Rc<RefCell<Vec<NonNull<CcBoxPtr>>>>) {
+    fn collect_white(s: &CcBoxPtr, w: Rc<RefCell<Vec<NonNull<CcBoxPtr>>>>) {
         if s.color() == Color::White && !s.buffered() {
             let w2 = Rc::clone(&w);
             s.data().color.set(Color::Black);
@@ -304,8 +304,8 @@ fn collect_roots() {
             // - The `data` part of the pointers are valid before "Step 3".
             // This is safe because there are no access to `data` after "Step 3",
             // and no access to `value` after "Step 2".
-            let s: &'static mut CcBoxPtr = unsafe { std::mem::transmute(s) };
-            let ptr: NonNull<CcBoxPtr> = unsafe { NonNull::new_unchecked(s as *mut CcBoxPtr) };
+            let s: *mut CcBoxPtr = unsafe { std::mem::transmute(s) };
+            let ptr: NonNull<CcBoxPtr> = unsafe { NonNull::new_unchecked(s) };
             let mut w = w2.borrow_mut();
             w.push(ptr);
         }

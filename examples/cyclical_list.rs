@@ -4,7 +4,7 @@ use std::cell::RefCell;
 
 struct List(Vec<Cc<RefCell<List>>>);
 impl Trace for List {
-    fn trace(&mut self, tracer: &mut Tracer) {
+    fn trace(&self, tracer: &mut Tracer) {
         self.0.trace(tracer);
     }
 }

@@ -40,7 +40,7 @@
 //!
 //! impl Trace for Owner {
 //!     // Note: nothing to trace since `Owner` doesn't own any Cc<T> things.
-//!     fn trace(&mut self, _tracer: &mut Tracer) { }
+//!     fn trace(&self, _tracer: &mut Tracer) { }
 //! }
 //!
 //! struct Gadget {
@@ -105,7 +105,7 @@
 //! }
 //!
 //! impl Trace for Owner {
-//!     fn trace(&mut self, _tracer: &mut Tracer) { }
+//!     fn trace(&self, _tracer: &mut Tracer) { }
 //! }
 //!
 //! struct Gadget {
@@ -115,8 +115,8 @@
 //! }
 //!
 //! impl Trace for Gadget {
-//!     fn trace(&mut self, tracer: &mut Tracer) {
-//!         tracer(&mut self.owner);
+//!     fn trace(&self, tracer: &mut Tracer) {
+//!         tracer(&self.owner);
 //!     }
 //! }
 //!
@@ -806,22 +806,22 @@ impl<T: fmt::Debug + Trace> fmt::Debug for Weak<T> {
 }
 
 impl<T: Trace> Trace for Cc<T> {
-    fn trace(&mut self, tracer: &mut Tracer) {
+    fn trace(&self, tracer: &mut Tracer) {
         unsafe {
-            tracer(self._ptr.as_mut());
+            tracer(self._ptr.as_ref());
         }
     }
 }
 
 impl<T: Trace> Trace for Weak<T> {
-    fn trace(&mut self, _tracer: &mut Tracer) {
+    fn trace(&self, _tracer: &mut Tracer) {
         // Weak references should not be traced.
     }
 }
 
 impl<T: Trace> Trace for CcBox<T> {
-    fn trace(&mut self, tracer: &mut Tracer) {
-        Trace::trace(&mut self.value, tracer);
+    fn trace(&self, tracer: &mut Tracer) {
+        Trace::trace(&self.value, tracer);
     }
 }
 
@@ -946,7 +946,7 @@ mod tests {
         }
 
         impl Trace for Cycle {
-            fn trace(&mut self, _: &mut Tracer) { }
+            fn trace(&self, _: &mut Tracer) { }
         }
 
         let a = Cc::new(Cycle { x: RefCell::new(None) });
