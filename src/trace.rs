@@ -265,6 +265,41 @@ mod impls {
         }
     }
 
+    mod func {
+        pub use super::*;
+        impl<X> Trace for fn() -> X {
+            fn trace(&self, _tracer: &mut Tracer) { }
+        }
+
+        impl<A, X> Trace for fn(A) -> X {
+            fn trace(&self, _tracer: &mut Tracer) { }
+        }
+
+        impl<A, B, X> Trace for fn(A, B) -> X {
+            fn trace(&self, _tracer: &mut Tracer) { }
+        }
+
+        impl<A, B, C, X> Trace for fn(A, B, C) -> X {
+            fn trace(&self, _tracer: &mut Tracer) { }
+        }
+
+        impl<A, B, C, D, X> Trace for fn(A, B, C, D) -> X {
+            fn trace(&self, _tracer: &mut Tracer) { }
+        }
+
+        impl<A, B, C, D, E, X> Trace for fn(A, B, C, D, E) -> X {
+            fn trace(&self, _tracer: &mut Tracer) { }
+        }
+
+        impl<A, B, C, D, E, F, X> Trace for fn(A, B, C, D, E, F) -> X {
+            fn trace(&self, _tracer: &mut Tracer) { }
+        }
+
+        impl<A, B, C, D, E, F, G, X> Trace for fn(A, B, C, D, E, F, G) -> X {
+            fn trace(&self, _tracer: &mut Tracer) { }
+        }
+    }
+
     mod ffi {
         pub use super::*;
         use std::ffi;
