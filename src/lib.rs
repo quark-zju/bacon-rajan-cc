@@ -302,6 +302,10 @@ impl<T: Trace> Cc<T> {
     fn possible_root(&mut self) {
         debug_assert!(self.strong() > 0);
 
+        if self.is_atomic() {
+            return;
+        }
+
         if self.color() == Color::Purple {
             return;
         }

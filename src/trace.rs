@@ -21,7 +21,33 @@ pub trait Trace {
     ///
     /// Failing to invoke the tracer on every owned `CcBoxPtr` can lead to
     /// leaking cycles.
+    ///
+    /// This function will be skipped if `is_atomic` returns `true`.
     fn trace(&self, tracer: &mut Tracer);
+
+    /// Returning true to opt-out being tracked by the cycle collector, and
+    /// behave more like an `Rc`.
+    fn is_atomic(&self) -> bool { false }
+}
+
+#[inline]
+pub(crate) fn trace_non_atomic(this: &CcBoxPtr, tracer: &mut Tracer) {
+    if !this.is_atomic() {
+        this.trace(tracer);
+    }
+}
+
+#[macro_export]
+/// Mark types as atomic. Atomic types opt-out the cycle collector.
+macro_rules! atomic {
+    ( $( $t: ty ),* ) => {
+        $(
+            impl $crate::Trace for $t {
+                fn trace(&self, _tracer: &mut $crate::Tracer) {}
+                fn is_atomic(&self) -> bool { true }
+            }
+        )*
+    }
 }
 
 mod impls {

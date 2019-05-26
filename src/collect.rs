@@ -12,6 +12,7 @@ use std::cell::RefCell;
 
 use cc_box_ptr::CcBoxPtr;
 use super::Color;
+use super::trace::trace_non_atomic;
 
 thread_local!(static ROOTS: RefCell<Vec<NonNull<CcBoxPtr>>> = RefCell::new(vec![]));
 
@@ -192,13 +193,14 @@ pub fn collect_cycles() {
 /// `scan_roots`.
 fn mark_roots() {
     fn mark_gray(cc_box_ptr: &CcBoxPtr) {
+        debug_assert!(!cc_box_ptr.is_atomic());
         if cc_box_ptr.color() == Color::Gray {
             return;
         }
 
         cc_box_ptr.data().color.set(Color::Gray);
 
-        cc_box_ptr.trace(&mut |t| {
+        trace_non_atomic(cc_box_ptr, &mut |t| {
             t.dec_strong();
             mark_gray(t);
         });
@@ -213,7 +215,7 @@ fn mark_roots() {
     let mut new_roots : Vec<_> = old_roots.into_iter().filter_map(|mut s| {
         let keep = unsafe {
             let box_ptr : &mut CcBoxPtr = s.as_mut();
-            if box_ptr.color() == Color::Purple {
+            if box_ptr.color() == Color::Purple && !box_ptr.is_atomic() {
                 mark_gray(box_ptr);
                 true
             } else {
@@ -245,8 +247,9 @@ fn mark_roots() {
 /// or Black if the node is still live.
 fn scan_roots() {
     fn scan_black(s: &CcBoxPtr) {
+        debug_assert!(!s.is_atomic());
         s.data().color.set(Color::Black);
-        s.trace(&mut |t| {
+        trace_non_atomic(s, &mut |t| {
             t.inc_strong();
             if t.color() != Color::Black {
                 scan_black(t);
@@ -255,6 +258,7 @@ fn scan_roots() {
     }
 
     fn scan(s: &CcBoxPtr) {
+        debug_assert!(!s.is_atomic());
         if s.color() != Color::Gray {
             return;
         }
@@ -263,7 +267,7 @@ fn scan_roots() {
             scan_black(s);
         } else {
             s.data().color.set(Color::White);
-            s.trace(&mut |t| {
+            trace_non_atomic(s, &mut |t| {
                 scan(t);
             });
         }
@@ -273,6 +277,7 @@ fn scan_roots() {
         let mut v = r.borrow_mut();
         for s in &mut *v {
             let p : &mut CcBoxPtr = unsafe { s.as_mut() };
+            // mark_roots() should have removed atomic roots.
             scan(p);
         }
     });
@@ -286,6 +291,7 @@ fn collect_roots() {
     use std::rc::Rc;
 
     fn collect_white(s: &CcBoxPtr, w: Rc<RefCell<Vec<NonNull<CcBoxPtr>>>>) {
+        debug_assert!(!s.is_atomic());
         if s.color() == Color::White && !s.buffered() {
             let w2 = Rc::clone(&w);
             s.data().color.set(Color::Black);
@@ -294,7 +300,7 @@ fn collect_roots() {
             // The side effect will be reverted by "Step 3".
             s.inc_weak();
 
-            s.trace(&mut move |t| {
+            trace_non_atomic(s, &mut move |t| {
                 collect_white(t, Rc::clone(&w));
             });
 
@@ -324,6 +330,8 @@ fn collect_roots() {
         for mut s in v.drain(..) {
             let ptr: &mut CcBoxPtr = unsafe { s.as_mut() };
             ptr.data().buffered.set(false);
+            // mark_roots() should have removed atomic roots.
+            // scan_roots() should not change it.
             collect_white(ptr, Rc::clone(&list));
         }
         // (`Rc<RefCell>` is unnecessary, but it's easier to compile)
