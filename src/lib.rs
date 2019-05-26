@@ -821,6 +821,7 @@ impl<T: Trace> Trace for Weak<T> {
     fn trace(&self, _tracer: &mut Tracer) {
         // Weak references should not be traced.
     }
+    fn is_atomic(&self) -> bool { true }
 }
 
 impl<T: Trace> Trace for CcBox<T> {

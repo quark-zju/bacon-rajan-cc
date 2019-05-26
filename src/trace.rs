@@ -56,65 +56,7 @@ mod impls {
     mod primitives {
         pub use super::*;
 
-        impl Trace for bool {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for char {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for f32 {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for f64 {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for i16 {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for i32 {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for i64 {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for i8 {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for isize {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for str {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for u16 {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for u32 {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for u64 {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for u8 {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for usize {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
+        atomic!(bool, char, f32, f64, i16, i32, i64, i8, isize, str, u16, u32, u64, u8, usize);
 
         impl<'a, T: Trace> Trace for &'a mut [T] {
             fn trace(&self, tracer: &mut Tracer) {
@@ -196,6 +138,7 @@ mod impls {
         }
 
         mod tuples {
+            atomic!(());
             // impl Trace for tuple {
             // }
         }
@@ -286,43 +229,51 @@ mod impls {
 
     mod string {
         pub use super::*;
-        impl Trace for String {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
+
+        atomic!(String);
     }
 
     mod func {
         pub use super::*;
+
         impl<X> Trace for fn() -> X {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<A, X> Trace for fn(A) -> X {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<A, B, X> Trace for fn(A, B) -> X {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<A, B, C, X> Trace for fn(A, B, C) -> X {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<A, B, C, D, X> Trace for fn(A, B, C, D) -> X {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<A, B, C, D, E, X> Trace for fn(A, B, C, D, E) -> X {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<A, B, C, D, E, F, X> Trace for fn(A, B, C, D, E, F) -> X {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<A, B, C, D, E, F, G, X> Trace for fn(A, B, C, D, E, F, G) -> X {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
     }
 
@@ -330,25 +281,7 @@ mod impls {
         pub use super::*;
         use std::ffi;
 
-        impl Trace for ffi::CStr {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for ffi::CString {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for ffi::NulError {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for ffi::OsStr {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for ffi::OsString {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
+        atomic!(ffi::CStr, ffi::CString, ffi::NulError, ffi::OsStr, ffi::OsString);
     }
 
     mod io {
@@ -357,62 +290,77 @@ mod impls {
 
         impl<T> Trace for io::BufReader<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T: io::Write> Trace for io::BufWriter<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T> Trace for io::Cursor<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl Trace for io::Empty {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl Trace for io::Error {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T> Trace for io::IntoInnerError<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T: io::Write> Trace for io::LineWriter<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T> Trace for io::Lines<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl Trace for io::Repeat {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl Trace for io::Sink {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T> Trace for io::Split<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl Trace for io::Stderr {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl Trace for io::Stdin {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl Trace for io::Stdout {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T> Trace for io::Take<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
     }
 
@@ -420,37 +368,16 @@ mod impls {
         pub use super::*;
         use std::net;
 
-        impl Trace for net::AddrParseError {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for net::Ipv4Addr {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for net::Ipv6Addr {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for net::SocketAddrV4 {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for net::SocketAddrV6 {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for net::TcpListener {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for net::TcpStream {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for net::UdpSocket {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
+        atomic!(
+            net::AddrParseError,
+            net::Ipv4Addr,
+            net::Ipv6Addr,
+            net::SocketAddrV4,
+            net::SocketAddrV6,
+            net::TcpListener,
+            net::TcpStream,
+            net::UdpSocket
+        );
     }
 
     mod option {
@@ -469,50 +396,23 @@ mod impls {
         pub use super::*;
         use std::path;
 
-        impl Trace for path::Path {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for path::PathBuf {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
+        atomic!(path::Path, path::PathBuf);
     }
 
     mod process {
         pub use super::*;
         use std::process;
 
-        impl Trace for process::Child {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for process::ChildStderr {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for process::ChildStdin {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for process::ChildStdout {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for process::Command {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for process::ExitStatus {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for process::Output {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
-
-        impl Trace for process::Stdio {
-            fn trace(&self, _tracer: &mut Tracer) { }
-        }
+        atomic!(
+            process::Child,
+            process::ChildStderr,
+            process::ChildStdin,
+            process::ChildStdout,
+            process::Command,
+            process::ExitStatus,
+            process::Output,
+            process::Stdio
+        );
     }
 
     mod rc {
@@ -521,10 +421,12 @@ mod impls {
 
         impl<T> Trace for rc::Rc<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T> Trace for rc::Weak<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
     }
 
@@ -547,26 +449,32 @@ mod impls {
 
         impl<T> Trace for sync::Arc<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl Trace for sync::Barrier {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl Trace for sync::Condvar {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T> Trace for sync::Mutex<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl Trace for sync::Once {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T> Trace for sync::PoisonError<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T: Trace> Trace for sync::RwLock<T> {
@@ -584,18 +492,22 @@ mod impls {
 
         impl Trace for thread::Builder {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T> Trace for thread::JoinHandle<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl<T> Trace for thread::LocalKey<T> {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
 
         impl Trace for thread::Thread {
             fn trace(&self, _tracer: &mut Tracer) { }
+            fn is_atomic(&self) -> bool { true }
         }
     }
 }
